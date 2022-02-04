@@ -142,6 +142,20 @@ async def ferias(ctx, arg1, arg2):
     #Atualiza a data
     dataDaRetro.append(int(arg1))
     dataDaRetro.append(int(arg2))
+    totalDias.pop()
+    hoje = datetime.datetime.now()
+    dia = int(hoje.strftime("%d"))
+    mes = int(hoje.strftime("%m"))
+    diasAteRetro = dataDaRetro[0] - dia
+    if diasAteRetro < 0:
+        if mes == 1 or mes == 3 or mes == 5 or mes == 7 or mes == 8 or mes == 10 or mes == 12:
+            diasAteRetro += 31 
+        elif mes == 2:
+            diasAteRetro += 28
+        else:   
+            diasAteRetro += 30
+    totalDias.append(diasAteRetro)
+    
     await ctx.send(f'Retrospectiva manualmente ajustada para dia {arg1}/{arg2}')
 
 
