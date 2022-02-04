@@ -57,17 +57,22 @@ async def retrospectiva(ctx):
         else: 
             diasAteRetro += 30
 
-    await ctx.reply(f'Falta {diasAteRetro} para a próxima restrospectiva! A próxima retro será dia {dataDaRetro[0]}/{dataDaRetro[1]}') 
+    if diasAteRetro == 1:
+        await ctx.reply(f'Falta {diasAteRetro} dia para a próxima restrospectiva! A próxima retro será dia {dataDaRetro[0]}/{dataDaRetro[1]}')
+    elif diasAteRetro == 0:
+        await ctx.reply(f'Hoje tem retrospectiva!')
+    else:
+        await ctx.reply(f'Faltam {diasAteRetro} dias para a próxima restrospectiva! A próxima retro será dia {dataDaRetro[0]}/{dataDaRetro[1]}')
 
 @bot.command(name="retro.ferias", help="Sem argumentos")
 async def ferias(ctx):
     avisoRetro.cancel()
-    await ctx.send("O bot não avisará mais sobre as retros.")
+    await ctx.send("O bot não avisará mais sobre as retrospectivas.")
 
 @bot.command(name="retro.volta", help="Sem argumentos")
 async def volta(ctx):
     avisoRetro.start()
-    await ctx.send("O bot voltará a avisar sobre as retros.")
+    await ctx.send("O bot voltará a avisar sobre as retrospectivas.")
 
 @bot.command(name="retro.manual", help="Argumentos: dia da volta, mês da volta")
 async def ferias(ctx, arg1, arg2):
@@ -77,7 +82,7 @@ async def ferias(ctx, arg1, arg2):
     #Atualiza a data
     dataDaRetro.append(int(arg1))
     dataDaRetro.append(int(arg2))
-    await ctx.send(f'Retro manualmente ajustada para dia {arg1}/{arg2}')
+    await ctx.send(f'Retrospectiva manualmente ajustada para dia {arg1}/{arg2}')
     
 @tasks.loop(hours=336)
 async def avisoRetro():
@@ -113,7 +118,7 @@ async def avisoRetro():
             dataDaRetro.append(dia + 14)
             dataDaRetro.append(mes)
     petianos = "<@&823601627382153267>"
-    channel = bot.get_channel(938858934259822685)
+    channel = bot.get_channel(823602554453622844)
     await channel.send(f'ATENÇÃO PETIANOS: Lembrando que hoje é dia de retrospectiva!! {petianos}')
 
 TOKEN = config("TOKEN")
