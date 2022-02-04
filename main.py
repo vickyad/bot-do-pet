@@ -43,6 +43,12 @@ async def addxing(ctx, arg):
 async def addxing(ctx):
     await ctx.send(f'Lista de xingamentos: {xingamentos}')
 
+@bot.command(name="hug", help="Argumento: @ da pessoa abraçada")
+async def volta(ctx, arg):
+    quemabraca = ctx.author
+    abracado = arg
+    await ctx.send(f'{quemabraca} abraçou beeeeem forte {abracado} <3')
+
 @bot.command(name="retro", help="Sem argumentos")
 async def retrospectiva(ctx):
     hoje = datetime.datetime.now()
