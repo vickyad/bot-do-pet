@@ -6,10 +6,10 @@ from discord.ext.commands import MissingRequiredArgument, CommandNotFound
 
 #Inícializações
 bot = commands.Bot("pet.")
-dataDaRetro = [0, 0] #Dia e mês
+dataDaRetro = [11, 2] #Dia e mês
 totalDias = [14]
-minutos = []
-horas = []
+
+
 
 #EVENTOS -> triggers específicos a parte dos comandos
 @bot.event
@@ -43,7 +43,7 @@ async def addxing(ctx, *args):
     with open("xingamentos.txt", 'a', encoding = 'utf-8') as f:
         menssagem = ' '.join(args)
         f.write(menssagem)
-        f.write(', ')
+        f.write(", ")
         await ctx.send(f'Foi adicionado "{menssagem}" à lista de xingamentos!')
 
 @bot.command(name="remover.xingamento", help="Argumento: posição do xingamento na lista de xingamentos")
@@ -52,7 +52,7 @@ async def removexing(ctx, arg):
         todosOsXingos = f.read()
         xingamentos = todosOsXingos.split(", ")
         xingamentos.pop(int(arg)-1)
-        novosXings = ', '.join(xingamentos)
+        novosXings = ", ".join(xingamentos)
         f.write(novosXings)
         await ctx.send(f'Foi removido o {arg}º xingamento da lista!')
 
@@ -76,16 +76,16 @@ async def addelog(ctx, *args):
     with open("elogios.txt", 'a', encoding = 'utf-8') as f:
         menssagem = ' '.join(args)
         f.write(menssagem)
-        f.write(', ')
+        f.write(", ")
         await ctx.send(f'Foi adicionado "{menssagem}" à lista de elogios!')
 
-@bot.command(name="remover.elog", help="Argumento: posição do elogio na lista de elogios")
+@bot.command(name="remover.elogio", help="Argumento: posição do elogio na lista de elogios")
 async def removeelog(ctx, arg):
     with open("elogios.txt", 'w+', encoding = 'utf-8') as f:
         todosOsElogios = f.read()
         elogio = todosOsElogios.split(", ")
         elogio.pop(int(arg)-1)
-        novosElogs = ', '.join(elogio)
+        novosElogs = ", ".join(elogio)
         f.write(novosElogs)
         await ctx.send(f'Foi removido o {arg}º elogio da lista!')
 
@@ -99,105 +99,70 @@ async def mostraelog(ctx):
 @bot.command(name="hug", help="Argumento: @ da pessoa abraçada")
 async def abraco(ctx, arg):
     quemabraca = ctx.author.id
-    abracado = arg
-    await ctx.send(f'<@{quemabraca}> abraçou beeeeem forte {abracado} <3')
+    await ctx.send(f'<@{quemabraca}> abraçou beeeeem forte {arg} <3')
 
-@bot.command(name="retro", help="Sem argumentos")
-async def retrospectiva(ctx):
-    totalDias.pop()
+@bot.command(name="retro")
+async def retro(ctx):
+    await ctx.reply(f'Faltam {totalDias[0]} dias até a próxima retrospectiva, que será no dia {dataDaRetro[0]}/{dataDaRetro[1]}.')
+
+@bot.command(name="retro.manual")
+async def retro_manual(ctx, arg):
+    data = arg.split('/')
+    dataDaRetro[0] = int(data[0])
+    dataDaRetro[1] = int(data[1])
     hoje = datetime.datetime.now()
     dia = int(hoje.strftime("%d"))
     mes = int(hoje.strftime("%m"))
     diasAteRetro = dataDaRetro[0] - dia
-    if diasAteRetro < 0:
-        if mes == 1 or mes == 3 or mes == 5 or mes == 7 or mes == 8 or mes == 10 or mes == 12:
-            diasAteRetro += 31 
-        elif mes == 2:
-            diasAteRetro += 28
-        else:   
-            diasAteRetro += 30
-    totalDias.append(diasAteRetro)
-    if diasAteRetro == 1:
-        await ctx.reply(f'Falta {diasAteRetro} dia para a próxima restrospectiva! A próxima retro será dia {dataDaRetro[0]}/{dataDaRetro[1]}')
-    elif diasAteRetro == 0:
-        await ctx.reply(f'Hoje tem retrospectiva!')
+    mesesAteRetro = dataDaRetro[1] - mes
+    if mesesAteRetro == 0:
+        if diasAteRetro < 0:
+            if mes == 1 or mes == 3 or mes == 5 or mes == 7 or mes == 8 or mes == 10 or mes == 12:
+                diasAteRetro += 31 
+            elif mes == 2:
+                diasAteRetro += 28
+            else: 
+                diasAteRetro += 30
     else:
-        await ctx.reply(f'Faltam {diasAteRetro} dias para a próxima restrospectiva! A próxima retro será dia {dataDaRetro[0]}/{dataDaRetro[1]}')
-
-@bot.command(name="retro.ferias", help="Sem argumentos")
-async def ferias(ctx):
-    avisoRetro.cancel()
-    await ctx.send("O bot não avisará mais sobre as retrospectivas.")
-
-@bot.command(name="retro.volta", help="Sem argumentos")
-async def volta(ctx):
-    avisoRetro.start()
-    await ctx.send("O bot voltará a avisar sobre as retrospectivas.")
-
-@bot.command(name="retro.manual", help="Argumentos: dia da volta, mês da volta. Não use '/'.")
-async def ferias(ctx, arg1, arg2):
-    #Remove a data anterior
-    dataDaRetro.pop()
-    dataDaRetro.pop()
-    #Atualiza a data
-    dataDaRetro.append(int(arg1))
-    dataDaRetro.append(int(arg2))
-    totalDias.pop()
-    hoje = datetime.datetime.now()
-    dia = int(hoje.strftime("%d"))
-    mes = int(hoje.strftime("%m"))
-    diasAteRetro = dataDaRetro[0] - dia
-    if diasAteRetro < 0:
         if mes == 1 or mes == 3 or mes == 5 or mes == 7 or mes == 8 or mes == 10 or mes == 12:
             diasAteRetro += 31 
         elif mes == 2:
             diasAteRetro += 28
-        else:   
+        else: 
             diasAteRetro += 30
-    totalDias.append(diasAteRetro)
-    
-    await ctx.send(f'Retrospectiva manualmente ajustada para dia {arg1}/{arg2}')
-
-
-
+    totalDias[0] = diasAteRetro+1
+    passar_dia.start()
+    await ctx.send(f'Retrospectiva manualmente ajustada para a data {dataDaRetro[0]}/{dataDaRetro[1]}')
 
 #ROTINAS -> funções periódicas
-@tasks.loop(hours=(totalDias[0] * 24))
-async def avisoRetro():
-    #Remove a data anterior
-    dataDaRetro.pop()
-    dataDaRetro.pop()
-    #Atualiza a data
-    hoje = datetime.datetime.now()
-    dia = int(hoje.strftime("%d"))
-    mes = int(hoje.strftime("%m"))
-    if mes == 1 or mes == 3 or mes == 5 or mes == 7 or mes == 8 or mes == 10 or mes == 12:
-        if dia + 14 > 31:    
-            dia = dia + 14 - 31
-            dataDaRetro.append(dia)
-            dataDaRetro.append(mes+1)
-        else:
-            dataDaRetro.append(dia + 14)
-            dataDaRetro.append(mes)
-    elif mes == 2:
-        if dia + 14 > 28:
-            dia = dia + 14 - 28
-            dataDaRetro.append(dia)
-            dataDaRetro.append(mes+1)
-        else:
-            dataDaRetro.append(dia + 14)
-            dataDaRetro.append(mes)
+@tasks.loop(hours=24)
+async def passar_dia():
+    if totalDias[0] != 0:
+        totalDias[0] -= 1
     else:
-        if dia + 14 > 30:
-            dia = dia + 14 - 30
-            dataDaRetro.append(dia)
-            dataDaRetro.append(mes+1)
-        else:
-            dataDaRetro.append(dia + 14)
-            dataDaRetro.append(mes)
+        avisa_retro()
+
+async def avisa_retro():
     petianos = "<@&823601627382153267>"
     channel = bot.get_channel(939127640898539520)
-    await channel.send(f'ATENÇÃO PETIANOS: Lembrando que hoje é dia de retrospectiva!! {petianos}')
+    if dataDaRetro[1] == 1 or dataDaRetro[1] == 3 or dataDaRetro[1] == 5 or dataDaRetro[1] == 7 or dataDaRetro[1] == 8 or dataDaRetro[1] == 10 or dataDaRetro[1] == 12:
+        if dataDaRetro[0] + 14 > 31:
+            dataDaRetro[0] = dataDaRetro[0] + 14 - 30
+        else:
+            dataDaRetro[0] += 14
+    elif dataDaRetro[1] == 2:
+        if dataDaRetro[0] + 14 > 28:
+            dataDaRetro[0] = dataDaRetro[0] + 14 - 28
+        else:
+            dataDaRetro[0] += 14
+    else: 
+        if dataDaRetro[0] + 14 > 30:
+            dataDaRetro[0] = dataDaRetro[0] + 14 - 30
+        else:
+            dataDaRetro[0] += 14
+    totalDias[0] = 14+1
+    passar_dia.start()
+    await channel.send(f'Atenção, {petianos}!\n Hoje e dia de retrospectiva, aproveitem pra escrever no canal respectivo de cada um.')
 
 TOKEN = config("TOKEN")
 bot.run(TOKEN)
