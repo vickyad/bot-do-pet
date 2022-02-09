@@ -144,7 +144,7 @@ async def retro_ferias(ctx):
 
 @bot.command(name="interpet", help="Sem argumentos")
 async def interpet(ctx):
-    await ctx.reply(f'Faltam {totalDiasInter[0]} dias até a próxima retrospectiva, que será no dia {dataDaRetro[0]}/{dataDaRetro[1]}.')
+    await ctx.reply(f'Faltam {totalDiasInter[0]} dias até o próximo interpet, que será no dia {dataDoInter[0]}/{dataDoInter[1]}.')
     
 @bot.command(name="interpet.manual", help="Argumentos: data e mês do interpet, separados por uma '/'.")
 async def interpet_manual(ctx, arg):
