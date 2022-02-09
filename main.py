@@ -92,10 +92,10 @@ async def removeelog(ctx, arg):
 
 @bot.command(name="mostrar.elogios", help="Sem argumentos")
 async def mostraelog(ctx):
-    with open("xingamentos.txt", 'r', encoding = 'utf-8') as f:
+    with open("elogios.txt", 'r', encoding = 'utf-8') as f:
         todosOsElogios = f.read()
         elogios = todosOsElogios.split(", ")
-        await ctx.send(f'Lista de xingamentos: {elogios}')  
+        await ctx.send(f'Lista de elogios: {elogios}')  
     
 @bot.command(name="hug", help="Argumento: @ da pessoa abraçada")
 async def abraco(ctx, arg):
