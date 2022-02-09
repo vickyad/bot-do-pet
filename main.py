@@ -7,8 +7,9 @@ from discord.ext.commands import MissingRequiredArgument, CommandNotFound
 #Inícializações
 bot = commands.Bot("pet.")
 dataDaRetro = [11, 2] #Dia e mês
-totalDias = [14]
-
+totalDiasRetro = [1]
+dataDoInter = [12, 2] #Dia e mês
+totalDiasInter = [2]
 
 
 #EVENTOS -> triggers específicos a parte dos comandos
@@ -101,11 +102,11 @@ async def abraco(ctx, arg):
     quemabraca = ctx.author.id
     await ctx.send(f'<@{quemabraca}> abraçou beeeeem forte {arg} <3')
 
-@bot.command(name="retro")
+@bot.command(name="retro", help="Sem argumentos")
 async def retro(ctx):
-    await ctx.reply(f'Faltam {totalDias[0]} dias até a próxima retrospectiva, que será no dia {dataDaRetro[0]}/{dataDaRetro[1]}.')
+    await ctx.reply(f'Faltam {totalDiasRetro[0]} dias até a próxima retrospectiva, que será no dia {dataDaRetro[0]}/{dataDaRetro[1]}.')
 
-@bot.command(name="retro.manual")
+@bot.command(name="retro.manual", help="Argumentos: data e mês da retro, separados por uma '/'.")
 async def retro_manual(ctx, arg):
     data = arg.split('/')
     dataDaRetro[0] = int(data[0])
@@ -130,15 +131,55 @@ async def retro_manual(ctx, arg):
             diasAteRetro += 28
         else: 
             diasAteRetro += 30
-    totalDias[0] = diasAteRetro+1
-    passar_dia.start()
+    totalDiasRetro[0] = diasAteRetro
+    passar_dia_Retro()
     await ctx.send(f'Retrospectiva manualmente ajustada para a data {dataDaRetro[0]}/{dataDaRetro[1]}')
+
+@bot.command(name="ferias", help="Sem argumentos")
+async def retro_ferias(ctx):
+    passar_dia_Interpet.cancel()
+    passar_dia_Retro.cancel()
+    await ctx.reply("Bot entrando de férias! Sem mais avisos da retrospectiva ou afins.")
+
+
+@bot.command(name="interpet", help="Sem argumentos")
+async def interpet(ctx):
+    await ctx.reply(f'Faltam {totalDiasInter[0]} dias até a próxima retrospectiva, que será no dia {dataDaRetro[0]}/{dataDaRetro[1]}.')
+    
+@bot.command(name="interpet.manual", help="Argumentos: data e mês do interpet, separados por uma '/'.")
+async def interpet_manual(ctx, arg):
+    data = arg.split('/')
+    dataDoInter[0] = int(data[0])
+    dataDoInter[1] = int(data[1])
+    hoje = datetime.datetime.now()
+    dia = int(hoje.strftime("%d"))
+    mes = int(hoje.strftime("%m"))
+    diasAteInter = dataDoInter[0] - dia
+    mesesAteInter = dataDoInter[1] - mes
+    if mesesAteInter == 0:
+        if diasAteInter < 0:
+            if mes == 1 or mes == 3 or mes == 5 or mes == 7 or mes == 8 or mes == 10 or mes == 12:
+                diasAteInter += 31 
+            elif mes == 2:
+                diasAteInter += 28
+            else: 
+                diasAteInter += 30
+    else:
+        if mes == 1 or mes == 3 or mes == 5 or mes == 7 or mes == 8 or mes == 10 or mes == 12:
+            diasAteInter += 31 
+        elif mes == 2:
+            diasAteInter += 28
+        else: 
+            diasAteInter += 30
+    totalDiasRetro[0] = diasAteInter
+    passar_dia_Interpet.start()
+    await ctx.send(f'Retrospectiva manualmente ajustada para a data {dataDoInter[0]}/{dataDoInter[1]}')
 
 #ROTINAS -> funções periódicas
 @tasks.loop(hours=24)
-async def passar_dia():
-    if totalDias[0] != 0:
-        totalDias[0] -= 1
+async def passar_dia_Retro():
+    if totalDiasRetro[0] != 0:
+        totalDiasRetro[0] -= 1
     else:
         avisa_retro()
 
@@ -160,9 +201,22 @@ async def avisa_retro():
             dataDaRetro[0] = dataDaRetro[0] + 14 - 30
         else:
             dataDaRetro[0] += 14
-    totalDias[0] = 14+1
-    passar_dia.start()
-    await channel.send(f'Atenção, {petianos}!\n Hoje e dia de retrospectiva, aproveitem pra escrever no canal respectivo de cada um.')
+    totalDiasRetro[0] = 14+1
+    passar_dia_Retro.start()
+    await channel.send(f'Atenção, {petianos}!\n Lembrando que amanhã é dia de retrospectiva, já aproveitem pra escrever o textos de vocês.')
+
+@tasks.loop(hours=24)
+async def passar_dia_Interpet():
+    if totalDiasInter[0] != 0:
+        totalDiasInter[0] -= 1
+    else:
+        avisa_inter()
+
+async def avisa_inter():
+    petianos = "<@&823601627382153267>"
+    channel = bot.get_channel(939127640898539520)
+    passar_dia_Interpet.cancel()
+    await channel.send(f'Atenção, {petianos}!\n Lembrando que amanhã é dia de interpet, estejam acordados amanhã de manhã!')
 
 TOKEN = config("TOKEN")
 bot.run(TOKEN)
