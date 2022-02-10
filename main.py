@@ -207,7 +207,7 @@ async def avisa_retro():
         if dataDaRetro[0] + 14 > 30:
             dataDaRetro[0] = dataDaRetro[0] + 14 - 30
         else:
-            dataDaRetro[0] += 14
+            dataDaRetro[0] += 14 + 1
     totalDiasRetro[0] = 14
     await channel.send(f'Atenção, {petianos}!\n Lembrando que amanhã é dia de retrospectiva, já aproveitem pra escrever o textos de vocês.')
 
