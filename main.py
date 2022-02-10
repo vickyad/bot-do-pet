@@ -1,4 +1,5 @@
 import datetime
+from pickle import FALSE
 import random
 from decouple import config
 from discord.ext import commands, tasks
@@ -10,7 +11,7 @@ dataDaRetro = [11, 2] #Dia e mês
 totalDiasRetro = [1]
 dataDoInter = [12, 2] #Dia e mês
 totalDiasInter = [2]
-
+arrumaBugDias = [0]
 
 #EVENTOS -> triggers específicos a parte dos comandos
 @bot.event
@@ -131,22 +132,25 @@ async def retro_manual(ctx, arg):
             diasAteRetro += 28
         else: 
             diasAteRetro += 30
-    totalDiasRetro[0] = diasAteRetro
-    passar_dia_Retro()
+    totalDiasRetro[0] = diasAteRetro + 1
+    passar_dia_Retro.start()
     await ctx.send(f'Retrospectiva manualmente ajustada para a data {dataDaRetro[0]}/{dataDaRetro[1]}')
 
-@bot.command(name="ferias", help="Sem argumentos")
+@bot.command(name="retro.ferias", help="Sem argumentos")
+async def retro_ferias(ctx):
+    passar_dia_Retro.cancel()
+    await ctx.reply("Bot entrando de férias das retrospectivas! Sem mais avisos ou afins.")
+
+@bot.command(name="inter.ferias", help="Sem argumentos")
 async def retro_ferias(ctx):
     passar_dia_Interpet.cancel()
-    passar_dia_Retro.cancel()
-    await ctx.reply("Bot entrando de férias! Sem mais avisos da retrospectiva ou afins.")
+    await ctx.reply("Bot entrando de férias do interpet! Sem mais avisos ou afins.")
 
-
-@bot.command(name="interpet", help="Sem argumentos")
+@bot.command(name="inter", help="Sem argumentos")
 async def interpet(ctx):
     await ctx.reply(f'Faltam {totalDiasInter[0]} dias até o próximo interpet, que será no dia {dataDoInter[0]}/{dataDoInter[1]}.')
     
-@bot.command(name="interpet.manual", help="Argumentos: data e mês do interpet, separados por uma '/'.")
+@bot.command(name="inter.manual", help="Argumentos: data e mês do interpet, separados por uma '/'.")
 async def interpet_manual(ctx, arg):
     data = arg.split('/')
     dataDoInter[0] = int(data[0])
@@ -171,21 +175,24 @@ async def interpet_manual(ctx, arg):
             diasAteInter += 28
         else: 
             diasAteInter += 30
-    totalDiasRetro[0] = diasAteInter
+    totalDiasRetro[0] = diasAteInter + 1
     passar_dia_Interpet.start()
     await ctx.send(f'Retrospectiva manualmente ajustada para a data {dataDoInter[0]}/{dataDoInter[1]}')
+
 
 #ROTINAS -> funções periódicas
 @tasks.loop(hours=24)
 async def passar_dia_Retro():
-    if totalDiasRetro[0] != 0:
+    if totalDiasRetro[0] > 1:
         totalDiasRetro[0] -= 1
     else:
-        avisa_retro()
+        avisa_retro.start()
 
+
+@tasks.loop(count=1)
 async def avisa_retro():
     petianos = "<@&823601627382153267>"
-    channel = bot.get_channel(939127640898539520)
+    channel = bot.get_channel(938858934259822685)
     if dataDaRetro[1] == 1 or dataDaRetro[1] == 3 or dataDaRetro[1] == 5 or dataDaRetro[1] == 7 or dataDaRetro[1] == 8 or dataDaRetro[1] == 10 or dataDaRetro[1] == 12:
         if dataDaRetro[0] + 14 > 31:
             dataDaRetro[0] = dataDaRetro[0] + 14 - 30
@@ -201,17 +208,17 @@ async def avisa_retro():
             dataDaRetro[0] = dataDaRetro[0] + 14 - 30
         else:
             dataDaRetro[0] += 14
-    totalDiasRetro[0] = 14+1
-    passar_dia_Retro.start()
+    totalDiasRetro[0] = 14
     await channel.send(f'Atenção, {petianos}!\n Lembrando que amanhã é dia de retrospectiva, já aproveitem pra escrever o textos de vocês.')
 
 @tasks.loop(hours=24)
 async def passar_dia_Interpet():
-    if totalDiasInter[0] != 0:
+    if totalDiasInter[0] > 1:
         totalDiasInter[0] -= 1
     else:
-        avisa_inter()
+        avisa_inter.start()
 
+@tasks.loop(count=1)
 async def avisa_inter():
     petianos = "<@&823601627382153267>"
     channel = bot.get_channel(939127640898539520)
