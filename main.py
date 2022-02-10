@@ -192,7 +192,7 @@ async def passar_dia_Retro():
 @tasks.loop(count=1)
 async def avisa_retro():
     petianos = "<@&823601627382153267>"
-    channel = bot.get_channel(938858934259822685)
+    channel = bot.get_channel(939127640898539520)
     if dataDaRetro[1] == 1 or dataDaRetro[1] == 3 or dataDaRetro[1] == 5 or dataDaRetro[1] == 7 or dataDaRetro[1] == 8 or dataDaRetro[1] == 10 or dataDaRetro[1] == 12:
         if dataDaRetro[0] + 14 > 31:
             dataDaRetro[0] = dataDaRetro[0] + 14 - 30
