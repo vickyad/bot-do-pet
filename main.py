@@ -89,7 +89,13 @@ async def remove_offense(ctx, *args):
 # Command: Mostrar xingamentos
 @bot_prefix.command(name="xingamentos", help="lista todas as formas possíveis de ofender o Matheus")
 async def show_offenses(ctx):
-    await ctx.send(f'lista de xingamentos: {offense_list}')
+    printable_offense_list = ', '.join(offense_list).lower()
+    em = discord.Embed(color=0xFF6347)
+    em.add_field(
+        name="**Lista de xingamentos:**",
+        value=f'{printable_offense_list}'
+    )
+    await ctx.send(embed = em)
 
 
 # Command: Elogiar
@@ -129,7 +135,13 @@ async def remove_praise(ctx, *args):
 # Command: Mostrar elogios
 @bot_prefix.command(name="elogios", help="mostra todas as formas de elogiar os outros")
 async def show_praises(ctx):
-    await ctx.send(f'lista de elogios: {praise_list}')  
+    printable_praise_list = ', '.join(praise_list).lower()
+    em = discord.Embed(color=0x9370DB)
+    em.add_field(
+        name="**Lista de elogios:**",
+        value=f'{printable_praise_list}'
+    )
+    await ctx.send(embed = em) 
 
 
 # Command: Hug    
@@ -226,10 +238,10 @@ async def remember_interpet():
 @bot_prefix.group(invoke_without_command=True)
 async def help(ctx):
     em = discord.Embed(
-        title="Bem-vinde ao Bot do PET!",
+        title="**Bem-vinde ao Bot do PET!**",
         url="https://github.com/petcomputacaoufrgs/bot-do-pet",
         description="Use pet.help para ter mais informações sobre o comando desejado.",
-        color=0xFF0000
+        color=0xFFFFFF
     )
     em.add_field(
         name="**Xingue o Matheus:**",
@@ -294,7 +306,7 @@ async def xingar_matheus(ctx):
     em = discord.Embed(
         title="**Comando: xingar o Matheus**",
         description="Não é necessário gastar sua saliva xingando o Matheus, o bot faz isso por você.",
-        color=0xFF0000
+        color=0xFF6347
     )
     em.add_field(
        name="**Argumentos:**",
@@ -314,7 +326,7 @@ async def add_xingamento(ctx):
     em = discord.Embed(
         title="**Comando: adicionar xingamento**",
         description="Adicione uma nova forma de ofender o Matheus!",
-        color=0xFF0000
+        color=0xFF6347
     )
     em.add_field(
        name="**Argumentos:**",
@@ -333,7 +345,7 @@ async def rem_xingamento(ctx):
     em = discord.Embed(
         title="**Comando: remover xingamento**",
         description="Não gostou de algum xingamento? Ele nunca mais será usado!",
-        color=0xFF0000
+        color=0xFF6347
     )
     em.add_field(
        name="**Argumentos:**",
@@ -353,7 +365,7 @@ async def xingamentos(ctx):
     em = discord.Embed(
         title="**Comando: listar xingamentos**",
         description="Lista todas as formas possíveis de ofender o Matheus.",
-        color=0xFF0000
+        color=0xFF6347
     )
     em.add_field(
        name="**Argumentos:**",
@@ -373,7 +385,7 @@ async def elogiar(ctx):
     em = discord.Embed(
         title="**Comando: elogiar**",
         description="Elogie alguém que fez um bom trabalho recentemente!",
-        color=0xFF0000
+        color=0x9370DB
     )
     em.add_field(
        name="**Argumentos:**",
@@ -393,7 +405,7 @@ async def add_elogio(ctx):
     em = discord.Embed(
         title="**Comando: adicionar elogio**",
         description="Adicione mais uma forma de reconhecermos o bom trabalho dos nossos coleguinhas.",
-        color=0xFF0000
+        color=0x9370DB
     )
     em.add_field(
        name="**Argumentos:**",
@@ -413,7 +425,7 @@ async def rem_elogio(ctx):
     em = discord.Embed(
         title="**Comando: remover elogio**",
         description="Não gostou de algum elogio? Não usaremos mais.",
-        color=0xFF0000
+        color=0x9370DB
     )
     em.add_field(
        name="**Argumentos:**",
@@ -433,7 +445,7 @@ async def elogios(ctx):
     em = discord.Embed(
         title="**Comando: listar elogios**",
         description="Lista todas as formas de elogiar os outros.",
-        color=0xFF0000
+        color=0x9370DB
     )
     em.add_field(
        name="**Argumentos:**",
@@ -453,7 +465,7 @@ async def hug(ctx):
     em = discord.Embed(
         title="**Comando: abraçar**",
         description="Demonstre seu carinho por alguém.",
-        color=0xFF0000
+        color=0x9370DB
     )
     em.add_field(
        name="**Argumentos:**",
@@ -473,7 +485,7 @@ async def retro(ctx):
     em = discord.Embed(
         title="**Comando: mostrar próxima retrospectiva**",
         description="Avisa quantos dias faltam pra retrospectiva.",
-        color=0xFF0000
+        color=0xF0E68C
     )
     em.add_field(
        name="**Argumentos:**",
@@ -493,7 +505,7 @@ async def retro_manual(ctx):
     em = discord.Embed(
         title="**Comando: settar a próxima retrospectiva**",
         description="Seta a nova data para a retrospectiva.",
-        color=0xFF0000
+        color=0xF0E68C
     )
     em.add_field(
        name="**Argumentos:**",
@@ -513,7 +525,7 @@ async def retro_ferias(ctx):
     em = discord.Embed(
         title="**Comando: férias da retrospectiva**",
         description="Desliga os avisos de retrospectiva.",
-        color=0xFF0000
+        color=0xF0E68C
     )
     em.add_field(
        name="**Argumentos:**",
@@ -532,7 +544,7 @@ async def inter(ctx):
     em = discord.Embed(
         title="**Comando: mostrar próximo interpet**",
         description="Avisa quantos dias faltam pra interpet.",
-        color=0xFF0000
+        color=0x98FB98
     )
     em.add_field(
        name="**Argumentos:**",
@@ -552,7 +564,7 @@ async def inter_manual(ctx):
     em = discord.Embed(
         title="**Comando: settar o próximo interpet**",
         description="Seta a nova data para o interpet.",
-        color=0xFF0000
+        color=0x98FB98
     )
     em.add_field(
        name="**Argumentos:**",
@@ -571,7 +583,7 @@ async def inter_ferias(ctx):
     em = discord.Embed(
         title="**Comando: férias do interpet**",
         description="Desliga os avisos do interpet.",
-        color=0xFF0000
+        color=0x98FB98
     )
     em.add_field(
        name="**Argumentos:**",
