@@ -1,4 +1,5 @@
 import datetime
+import json
 import random
 from decouple import config
 from discord.ext import commands, tasks
@@ -19,23 +20,17 @@ RETRO_CHANNEL = 939127640898539520
 
 # Setup
 bot_prefix = commands.Bot("teste.")
-praise_list = []
-praise_list = []
 
 retro_day = initialize_date(datetime.date(2022, 2, 23), 14)
 interpet_day = initialize_date(datetime.date(2022, 2, 19), 30)
 
 
 # Get swearings from file
-with open("xingamentos.txt", 'r', encoding='utf-8') as file:
-        raw_data = file.read()
-        praise_list = raw_data.split(", ")
+with open('data.json', 'r', encoding='utf-8') as json_file:
+    data = json.load(json_file)
 
-# Get praises from file
-with open("elogios.txt", 'r', encoding = 'utf-8') as f:
-        raw_data = f.read()
-        praise_list = raw_data.split(", ")
-
+praise_list = data['praises']
+offense_list = data['offenses']
 
 # EVENTS
 @bot_prefix.event
@@ -65,9 +60,11 @@ async def offend_matheus(ctx):
 @bot_prefix.command(name="add_xingamento", help="adicione uma nova forma de ofender o Matheus!")
 async def add_offense(ctx, *args):
     message = ' '.join(args).lower()
-    praise_list.append(message)
-    with open("xingamentos.txt", 'a', encoding = 'utf-8') as file:
-        file.write(f', {message}')
+    offense_list.append(message)
+
+    di = {'offenses': offense_list, 'praises': praise_list}
+    with open('data.json', 'w+', encoding='utf-8') as outfile:
+        json.dump(di, outfile)
         await ctx.send(f'"{message}" foi adicionado à lista!')
 
 
@@ -75,11 +72,12 @@ async def add_offense(ctx, *args):
 @bot_prefix.command(name="rem_xingamento", help="não gostou de algum xingamento? ele nunca mais será usado")
 async def remove_offense(ctx, *args):
     swear_to_be_removed = ' '.join(args).lower()
-    if swear_to_be_removed in praise_list:
-        praise_list.remove(swear_to_be_removed)
-        with open("xingamentos.txt", 'w+', encoding = 'utf-8') as file:
-            new_swearing_list = ", ".join(praise_list)
-            file.write(new_swearing_list)
+    if swear_to_be_removed in offense_list:
+        offense_list.remove(swear_to_be_removed)
+
+        di = {'offenses': offense_list, 'praises': praise_list}
+        with open('data.json', 'w+', encoding='utf-8') as outfile:
+            json.dump(di, outfile)
             await ctx.send(f'"{swear_to_be_removed}" foi removido da lista!')
     else:
         await ctx.send(f'esse xingamento não existe')
@@ -88,7 +86,7 @@ async def remove_offense(ctx, *args):
 # Command: Mostrar xingamentos
 @bot_prefix.command(name="xingamentos", help="lista todas as formas possíveis de ofender o Matheus")
 async def show_offenses(ctx):
-    await ctx.send(f'lista de xingamentos: {praise_list}')
+    await ctx.send(f'lista de xingamentos: {offense_list}')
 
 
 # Command: Elogiar
@@ -104,8 +102,9 @@ async def add_praise(ctx, *args):
     message = ' '.join(args).lower()
     praise_list.append(message)
 
-    with open("elogios.txt", 'a', encoding = 'utf-8') as f:
-        f.write(f', {message}')
+    di = {'offenses': offense_list, 'praises': praise_list}
+    with open('data.json', 'w+', encoding='utf-8') as outfile:
+        json.dump(di, outfile)
         await ctx.send(f'"{message}" foi adicionado à lista!')
 
 
@@ -115,9 +114,10 @@ async def remove_praise(ctx, *args):
     praise_to_be_removed = ' '.join(args).lower()
     if praise_to_be_removed in praise_list:
         praise_list.remove(praise_to_be_removed)
-        with open("elogios.txt", 'w+', encoding = 'utf-8') as file:
-            new_praise_list = ", ".join(praise_list)
-            file.write(new_praise_list)
+
+        di = {'offenses': offense_list, 'praises': praise_list}
+        with open('data.json', 'w+', encoding='utf-8') as outfile:
+            json.dump(di, outfile)
             await ctx.send(f'"{praise_to_be_removed}" foi removido da lista!')
     else:
         await ctx.send(f'esse elogio não existe')
