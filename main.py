@@ -21,7 +21,7 @@ RETRO_CHANNEL = 939127640898539520
 BOT_RECOMMENDATIONS_CHANNEL = 939130179698196530
 
 # Setup
-bot_prefix = commands.Bot("teste.")
+bot_prefix = commands.Bot("pet.")
 bot_prefix.remove_command("help")
 
 retro_day = initialize_date(datetime.date(2022, 2, 23), 14)
@@ -145,7 +145,7 @@ async def retrospective(ctx):
 
 
 # Command: Retrospectiva Manual
-@bot_prefix.command(name="retro.manual", help="seta a nova data para a retrospectiva, no formato dd/mm")
+@bot_prefix.command(name="retro_manual", help="seta a nova data para a retrospectiva, no formato dd/mm")
 async def set_retrospective(ctx, arg):
     day, month = arg.split('/')
 
@@ -159,7 +159,7 @@ async def set_retrospective(ctx, arg):
 
 
 # Command: Retrospectiva Ferias
-@bot_prefix.command(name="retro.ferias", help="desliga os avisos de retrospectiva")
+@bot_prefix.command(name="retro_ferias", help="desliga os avisos de retrospectiva")
 async def set_retrospective_vacation(ctx):
     is_retrospective_eve.cancel()
     await ctx.reply("bot entrando de férias das retrospectivas! Sem mais avisos ou afins.")
@@ -172,7 +172,7 @@ async def interpet(ctx):
 
 
 # Command: Interpet Manual    
-@bot_prefix.command(name="inter.manual", help="seta a nova data para a interpet, no formato dd/mm")
+@bot_prefix.command(name="inter_manual", help="seta a nova data para a interpet, no formato dd/mm")
 async def set_interpet(ctx, arg):
     day, month = arg.split('/')
 
@@ -186,7 +186,7 @@ async def set_interpet(ctx, arg):
 
 
 # Command: Interpet Ferias
-@bot_prefix.command(name="inter.ferias", help="desliga os avisos de interpet")
+@bot_prefix.command(name="inter_ferias", help="desliga os avisos de interpet")
 async def set_interpet_vacation(ctx):
     is_interpet_eve.cancel()
     await ctx.reply("bot entrando de férias do interpet! Sem mais avisos ou afins.")
@@ -261,8 +261,8 @@ async def help(ctx):
         name="**Retrospectiva:**",
         value="""
             *pet.retro*
-            *pet.retro.manual*
-            *pet.retro.ferias*
+            *pet.retro_manual*
+            *pet.retro_ferias*
             """,
         inline=True
     )
@@ -270,8 +270,8 @@ async def help(ctx):
         name="**Interpet:**",
         value="""
             *pet.inter*
-            *pet.inter.manual*
-            *pet.inter.ferias*
+            *pet.inter_manual*
+            *pet.inter_ferias*
             """,
         inline=True
     )
@@ -502,7 +502,7 @@ async def retro_manual(ctx):
     )
     em.add_field(
        name="**Exemplo de uso:**",
-       value="```pet.retro.manual <dia/mes>```",
+       value="```pet.retro_manual <dia/mes>```",
        inline=False
     )
     await ctx.send(embed = em)
@@ -522,7 +522,7 @@ async def retro_ferias(ctx):
     )
     em.add_field(
        name="**Exemplo de uso:**",
-       value="```pet.retro.ferias```",
+       value="```pet.retro_ferias```",
        inline=False
     )
     await ctx.send(embed = em)
@@ -561,7 +561,7 @@ async def inter_manual(ctx):
     )
     em.add_field(
        name="**Exemplo de uso:**",
-       value="```pet.inter.manual <dia/mes>```",
+       value="```pet.inter_manual <dia/mes>```",
        inline=False
     )
     await ctx.send(embed = em)
@@ -580,7 +580,7 @@ async def inter_ferias(ctx):
     )
     em.add_field(
        name="**Exemplo de uso:**",
-       value="```pet.inter.ferias```",
+       value="```pet.inter_ferias```",
        inline=False
     )
     await ctx.send(embed = em)
