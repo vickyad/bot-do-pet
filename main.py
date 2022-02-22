@@ -55,8 +55,8 @@ async def on_command_error(ctx, error):
 # Command: Xingar Matheus
 @bot_prefix.command(name="xingar_matheus", help="não é necessário gastar sua saliva xingando o Matheus, o bot faz isso por você")
 async def offend_matheus(ctx):
-    num = random.randint(0, len(praise_list))
-    await ctx.send(f'{praise_list[num]}, {MATHEUS}')   
+    num = random.randint(0, len(offense_list))
+    await ctx.send(f'{offense_list[num]}, {MATHEUS}')   
 
 
 # Command: Adicionar xingamento
