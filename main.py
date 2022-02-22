@@ -1,24 +1,49 @@
 import datetime
-from pickle import FALSE
 import random
 from decouple import config
 from discord.ext import commands, tasks
 from discord.ext.commands import MissingRequiredArgument, CommandNotFound
 
-#Inícializações
-bot = commands.Bot("pet.")
-dataDaRetro = [11, 2] #Dia e mês
-totalDiasRetro = [1]
-dataDoInter = [12, 2] #Dia e mês
-totalDiasInter = [2]
-arrumaBugDias = [0]
+def initialize_date(current_day, interval):
+    today = datetime.date.today()
+    while current_day < today:
+        current_day += datetime.timedelta(days=interval)
+    return current_day
 
-#EVENTOS -> triggers específicos a parte dos comandos
-@bot.event
+
+# Constants
+PETIANES = "<@&823601627382153267>"
+MATHEUS = "<@282646325185609728>"
+
+RETRO_CHANNEL = 939127640898539520
+
+# Setup
+bot_prefix = commands.Bot("teste.")
+praise_list = []
+praise_list = []
+
+retro_day = initialize_date(datetime.date(2022, 2, 23), 14)
+interpet_day = initialize_date(datetime.date(2022, 2, 19), 30)
+
+
+# Get swearings from file
+with open("xingamentos.txt", 'r', encoding='utf-8') as file:
+        raw_data = file.read()
+        praise_list = raw_data.split(", ")
+
+# Get praises from file
+with open("elogios.txt", 'r', encoding = 'utf-8') as f:
+        raw_data = f.read()
+        praise_list = raw_data.split(", ")
+
+
+# EVENTS
+@bot_prefix.event
 async def on_ready():
     print("Estou pronto!")
 
-@bot.event
+
+@bot_prefix.event
 async def on_command_error(ctx, error):
     if isinstance(error, MissingRequiredArgument):
         await ctx.send("Favor enviar todos os argumentos. Use pet.help para ver quais são os argumentos necessários.")
@@ -28,202 +53,171 @@ async def on_command_error(ctx, error):
         raise error
 
 
+# COMMANDS
+# Command: Xingar Matheus
+@bot_prefix.command(name="xingar_matheus", help="não é necessário gastar sua saliva xingando o Matheus, o bot faz isso por você")
+async def offend_matheus(ctx):
+    num = random.randint(0, len(praise_list))
+    await ctx.send(f'{praise_list[num]}, {MATHEUS}')   
 
 
-#COMANDOS -> inicializados com 'pet.'
-@bot.command(name="xingar.matheus", help="Sem argumentos")
-async def xingamath(ctx):
-    with open("xingamentos.txt", 'r', encoding = 'utf-8') as f:
-        todosOsXingos = f.read()
-        xingamentos = todosOsXingos.split(", ")
-        matheus = "<@282646325185609728>"
-        numero = random.randint(0, len(xingamentos))
-        await ctx.send(f'{xingamentos[numero]}, {matheus}')   
+# Command: Adicionar xingamento
+@bot_prefix.command(name="add_xingamento", help="adicione uma nova forma de ofender o Matheus!")
+async def add_offense(ctx, *args):
+    message = ' '.join(args).lower()
+    praise_list.append(message)
+    with open("xingamentos.txt", 'a', encoding = 'utf-8') as file:
+        file.write(f', {message}')
+        await ctx.send(f'"{message}" foi adicionado à lista!')
 
-@bot.command(name="adicionar.xingamento", help="Argumento: xingamento a ser passado.")
-async def addxing(ctx, *args):
-    with open("xingamentos.txt", 'a', encoding = 'utf-8') as f:
-        menssagem = ' '.join(args)
-        f.write(menssagem)
-        f.write(", ")
-        await ctx.send(f'Foi adicionado "{menssagem}" à lista de xingamentos!')
 
-@bot.command(name="remover.xingamento", help="Argumento: posição do xingamento na lista de xingamentos")
-async def removexing(ctx, arg):
-    with open("xingamentos.txt", 'w+', encoding = 'utf-8') as f:
-        todosOsXingos = f.read()
-        xingamentos = todosOsXingos.split(", ")
-        xingamentos.pop(int(arg)-1)
-        novosXings = ", ".join(xingamentos)
-        f.write(novosXings)
-        await ctx.send(f'Foi removido o {arg}º xingamento da lista!')
+# Command: Remover xingamento
+@bot_prefix.command(name="rem_xingamento", help="não gostou de algum xingamento? ele nunca mais será usado")
+async def remove_offense(ctx, *args):
+    swear_to_be_removed = ' '.join(args).lower()
+    if swear_to_be_removed in praise_list:
+        praise_list.remove(swear_to_be_removed)
+        with open("xingamentos.txt", 'w+', encoding = 'utf-8') as file:
+            new_swearing_list = ", ".join(praise_list)
+            file.write(new_swearing_list)
+            await ctx.send(f'"{swear_to_be_removed}" foi removido da lista!')
+    else:
+        await ctx.send(f'esse xingamento não existe')
 
-@bot.command(name="mostrar.xingamentos", help="Sem argumentos")
-async def mostraxing(ctx):
-    with open("xingamentos.txt", 'r', encoding = 'utf-8') as f:
-        todosOsXingos = f.read()
-        xingamentos = todosOsXingos.split(", ")
-        await ctx.send(f'Lista de xingamentos: {xingamentos}')
 
-@bot.command(name="elogiar", help="Argumento: @da pessoa elogiada")
-async def elogiar(ctx, arg):
-    with open("elogios.txt", 'r', encoding = 'utf-8') as f:
-        todosOsElogios = f.read()
-        elogio = todosOsElogios.split(", ")
-        numero = random.randint(0, len(elogio))
-        await ctx.send(f'{elogio[numero]}, {arg}!')   
+# Command: Mostrar xingamentos
+@bot_prefix.command(name="xingamentos", help="lista todas as formas possíveis de ofender o Matheus")
+async def show_offenses(ctx):
+    await ctx.send(f'lista de xingamentos: {praise_list}')
 
-@bot.command(name="adicionar.elogio", help="Argumento: elogio a ser passado.")
-async def addelog(ctx, *args):
+
+# Command: Elogiar
+@bot_prefix.command(name="elogiar", help="elogie alguém que fez um bom trabalho recentemente!")
+async def praise(ctx, arg):
+    num = random.randint(0, len(praise_list))
+    await ctx.send(f'{praise_list[num]}, {arg}!')   
+
+
+# Command: Adionar elogio
+@bot_prefix.command(name="add_elogio", help="adicione mais uma forma de falarmos bem dos nossos coleguinhas")
+async def add_praise(ctx, *args):
+    message = ' '.join(args).lower()
+    praise_list.append(message)
+
     with open("elogios.txt", 'a', encoding = 'utf-8') as f:
-        menssagem = ' '.join(args)
-        f.write(menssagem)
-        f.write(", ")
-        await ctx.send(f'Foi adicionado "{menssagem}" à lista de elogios!')
+        f.write(f', {message}')
+        await ctx.send(f'"{message}" foi adicionado à lista!')
 
-@bot.command(name="remover.elogio", help="Argumento: posição do elogio na lista de elogios")
-async def removeelog(ctx, arg):
-    with open("elogios.txt", 'w+', encoding = 'utf-8') as f:
-        todosOsElogios = f.read()
-        elogio = todosOsElogios.split(", ")
-        elogio.pop(int(arg)-1)
-        novosElogs = ", ".join(elogio)
-        f.write(novosElogs)
-        await ctx.send(f'Foi removido o {arg}º elogio da lista!')
 
-@bot.command(name="mostrar.elogios", help="Sem argumentos")
-async def mostraelog(ctx):
-    with open("elogios.txt", 'r', encoding = 'utf-8') as f:
-        todosOsElogios = f.read()
-        elogios = todosOsElogios.split(", ")
-        await ctx.send(f'Lista de elogios: {elogios}')  
-    
-@bot.command(name="hug", help="Argumento: @ da pessoa abraçada")
-async def abraco(ctx, arg):
-    quemabraca = ctx.author.id
-    await ctx.send(f'<@{quemabraca}> abraçou beeeeem forte {arg} <3')
-
-@bot.command(name="retro", help="Sem argumentos")
-async def retro(ctx):
-    await ctx.reply(f'Faltam {totalDiasRetro[0]} dias até a próxima retrospectiva, que será no dia {dataDaRetro[0]}/{dataDaRetro[1]}.')
-
-@bot.command(name="retro.manual", help="Argumentos: data e mês da retro, separados por uma '/'.")
-async def retro_manual(ctx, arg):
-    data = arg.split('/')
-    dataDaRetro[0] = int(data[0])
-    dataDaRetro[1] = int(data[1])
-    hoje = datetime.datetime.now()
-    dia = int(hoje.strftime("%d"))
-    mes = int(hoje.strftime("%m"))
-    diasAteRetro = dataDaRetro[0] - dia
-    mesesAteRetro = dataDaRetro[1] - mes
-    if mesesAteRetro == 0:
-        if diasAteRetro < 0:
-            if mes == 1 or mes == 3 or mes == 5 or mes == 7 or mes == 8 or mes == 10 or mes == 12:
-                diasAteRetro += 31 
-            elif mes == 2:
-                diasAteRetro += 28
-            else: 
-                diasAteRetro += 30
+# Command: Remover elogio
+@bot_prefix.command(name="rem_elogio", help="não gostou de algum elogio? só mandar o elogio a ser removido")
+async def remove_praise(ctx, *args):
+    praise_to_be_removed = ' '.join(args).lower()
+    if praise_to_be_removed in praise_list:
+        praise_list.remove(praise_to_be_removed)
+        with open("elogios.txt", 'w+', encoding = 'utf-8') as file:
+            new_praise_list = ", ".join(praise_list)
+            file.write(new_praise_list)
+            await ctx.send(f'"{praise_to_be_removed}" foi removido da lista!')
     else:
-        if mes == 1 or mes == 3 or mes == 5 or mes == 7 or mes == 8 or mes == 10 or mes == 12:
-            diasAteRetro += 31 
-        elif mes == 2:
-            diasAteRetro += 28
-        else: 
-            diasAteRetro += 30
-    totalDiasRetro[0] = diasAteRetro + 1
-    passar_dia_Retro.start()
-    await ctx.send(f'Retrospectiva manualmente ajustada para a data {dataDaRetro[0]}/{dataDaRetro[1]}')
+        await ctx.send(f'esse elogio não existe')
 
-@bot.command(name="retro.ferias", help="Sem argumentos")
-async def retro_ferias(ctx):
-    passar_dia_Retro.cancel()
-    await ctx.reply("Bot entrando de férias das retrospectivas! Sem mais avisos ou afins.")
 
-@bot.command(name="inter.ferias", help="Sem argumentos")
-async def retro_ferias(ctx):
-    passar_dia_Interpet.cancel()
-    await ctx.reply("Bot entrando de férias do interpet! Sem mais avisos ou afins.")
+# Command: Mostrar elogios
+@bot_prefix.command(name="elogios", help="mostra todas as formas de elogiar os outros")
+async def show_praises(ctx):
+    await ctx.send(f'lista de elogios: {praise_list}')  
 
-@bot.command(name="inter", help="Sem argumentos")
+
+# Command: Hug    
+@bot_prefix.command(name="hug", help="demonstre seu carinho por alguém")
+async def hug(ctx, arg):
+    await ctx.send(f'<@{ctx.author.id}> abraçou beeeeem forte {arg} <3')
+
+
+# Command: Retrospectiva
+@bot_prefix.command(name="retro", help="avisa quantos dias faltam pra retrospectiva")
+async def retrospective(ctx):
+    await ctx.reply(f'faltam {retro_day.day - datetime.date.today().day} dias até a próxima retrospectiva, que será no dia {retro_day.day}/{retro_day.month}.')
+
+
+# Command: Retrospectiva Manual
+@bot_prefix.command(name="retro.manual", help="seta a nova data para a retrospectiva, no formato dd/mm")
+async def set_retrospective(ctx, arg):
+    day, month = arg.split('/')
+
+    try:
+        global retro_day
+        retro_day = datetime.datetime(int(datetime.date.today().year), int(month), int(day))
+        is_retrospective_eve.start()
+        await ctx.send(f'retrospectiva manualmente ajustada para a data {retro_day.day}/{retro_day.month}')
+    except ValueError:
+        print('Erro')
+
+
+# Command: Retrospectiva Ferias
+@bot_prefix.command(name="retro.ferias", help="desliga os avisos de retrospectiva")
+async def set_retrospective_vacation(ctx):
+    is_retrospective_eve.cancel()
+    await ctx.reply("bot entrando de férias das retrospectivas! Sem mais avisos ou afins.")
+
+
+# Command: Interpet
+@bot_prefix.command(name="inter", help="avisa quantos dias faltam pra interpet")
 async def interpet(ctx):
-    await ctx.reply(f'Faltam {totalDiasInter[0]} dias até o próximo interpet, que será no dia {dataDoInter[0]}/{dataDoInter[1]}.')
-    
-@bot.command(name="inter.manual", help="Argumentos: data e mês do interpet, separados por uma '/'.")
-async def interpet_manual(ctx, arg):
-    data = arg.split('/')
-    dataDoInter[0] = int(data[0])
-    dataDoInter[1] = int(data[1])
-    hoje = datetime.datetime.now()
-    dia = int(hoje.strftime("%d"))
-    mes = int(hoje.strftime("%m"))
-    diasAteInter = dataDoInter[0] - dia
-    mesesAteInter = dataDoInter[1] - mes
-    if mesesAteInter == 0:
-        if diasAteInter < 0:
-            if mes == 1 or mes == 3 or mes == 5 or mes == 7 or mes == 8 or mes == 10 or mes == 12:
-                diasAteInter += 31 
-            elif mes == 2:
-                diasAteInter += 28
-            else: 
-                diasAteInter += 30
-    else:
-        if mes == 1 or mes == 3 or mes == 5 or mes == 7 or mes == 8 or mes == 10 or mes == 12:
-            diasAteInter += 31 
-        elif mes == 2:
-            diasAteInter += 28
-        else: 
-            diasAteInter += 30
-    totalDiasRetro[0] = diasAteInter + 1
-    passar_dia_Interpet.start()
-    await ctx.send(f'Retrospectiva manualmente ajustada para a data {dataDoInter[0]}/{dataDoInter[1]}')
+    await ctx.reply(f'faltam {interpet_day - datetime.date.today().day} dias até o próximo interpet, que será no dia {interpet_day.day}/{interpet_day.month}.')
 
 
-#ROTINAS -> funções periódicas
+# Command: Interpet Manual    
+@bot_prefix.command(name="inter.manual", help="seta a nova data para a interpet, no formato dd/mm")
+async def set_interpet(ctx, arg):
+    day, month = arg.split('/')
+
+    try:
+        global interpet_day
+        interpet_day = datetime.datetime(int(datetime.date.today().year), int(month), int(day))
+        is_interpet_eve.start()
+        await ctx.send(f'retrospectiva manualmente ajustada para a data {interpet_day.day}/{interpet_day.month}')
+    except ValueError:
+        print('Erro')
+
+
+# Command: Interpet Ferias
+@bot_prefix.command(name="inter.ferias", help="desliga os avisos de interpet")
+async def set_interpet_vacation(ctx):
+    is_interpet_eve.cancel()
+    await ctx.reply("bot entrando de férias do interpet! Sem mais avisos ou afins.")
+
+
+# ROTINES
 @tasks.loop(hours=24)
-async def passar_dia_Retro():
-    if totalDiasRetro[0] > 1:
-        totalDiasRetro[0] -= 1
-    else:
-        avisa_retro.start()
+async def is_retrospective_eve():
+    global retro_day
+    if retro_day == datetime.date.today() - datetime.timedelta(days=1):
+        remember_retrospective.start()
 
 
 @tasks.loop(count=1)
-async def avisa_retro():
-    petianos = "<@&823601627382153267>"
-    channel = bot.get_channel(939127640898539520)
-    if dataDaRetro[1] == 1 or dataDaRetro[1] == 3 or dataDaRetro[1] == 5 or dataDaRetro[1] == 7 or dataDaRetro[1] == 8 or dataDaRetro[1] == 10 or dataDaRetro[1] == 12:
-        if dataDaRetro[0] + 14 > 31:
-            dataDaRetro[0] = dataDaRetro[0] + 14 - 30
-        else:
-            dataDaRetro[0] += 14
-    elif dataDaRetro[1] == 2:
-        if dataDaRetro[0] + 14 > 28:
-            dataDaRetro[0] = dataDaRetro[0] + 14 - 28
-        else:
-            dataDaRetro[0] += 14
-    else: 
-        if dataDaRetro[0] + 14 > 30:
-            dataDaRetro[0] = dataDaRetro[0] + 14 - 30
-        else:
-            dataDaRetro[0] += 14 + 1
-    totalDiasRetro[0] = 14
-    await channel.send(f'Atenção, {petianos}!\n Lembrando que amanhã é dia de retrospectiva, já aproveitem pra escrever o textos de vocês.')
+async def remember_retrospective():
+    global retro_day
+    retro_day += datetime.timedelta(days=14)
+    channel = bot_prefix.get_channel(RETRO_CHANNEL)
+    await channel.send(f'atenção, {PETIANES}!\n lembrando que amanhã é dia de retrospectiva, já aproveitem pra escrever o textos de vocês.')
+
 
 @tasks.loop(hours=24)
-async def passar_dia_Interpet():
-    if totalDiasInter[0] > 1:
-        totalDiasInter[0] -= 1
-    else:
-        avisa_inter.start()
+async def is_interpet_eve():
+    global interpet_day
+    if interpet_day == datetime.date.today() - datetime.timedelta(days=1):
+        remember_interpet.start()
+
 
 @tasks.loop(count=1)
-async def avisa_inter():
-    petianos = "<@&823601627382153267>"
-    channel = bot.get_channel(939127640898539520)
-    passar_dia_Interpet.cancel()
-    await channel.send(f'Atenção, {petianos}!\n Lembrando que amanhã é dia de interpet, estejam acordados amanhã de manhã!')
+async def remember_interpet():
+    global interpet_day
+    interpet_day += datetime.timedelta(month=1)
+    channel = bot_prefix.get_channel(RETRO_CHANNEL)
+    await channel.send(f'atenção, {PETIANES}!\n lembrando que amanhã é dia de interpet, estejam acordados amanhã de manhã!')
 
 TOKEN = config("TOKEN")
-bot.run(TOKEN)
+bot_prefix.run(TOKEN)
