@@ -1,7 +1,7 @@
 # Bot para Discord
 #### Projeto: Atividade Internas
 #### Linguagem utilizada: Python (versão 3.9.2)
-##### Autor: [Nathan](https://github.com/neitaans)
+##### Autor: [Nathan](https://github.com/neitaans) e [Vic](https://github.com/vickyad)
 
 
 ## Descrição
