@@ -1,7 +1,7 @@
 # Bot para Discord
 #### Projeto: Atividade Internas
 #### Linguagem utilizada: Python (versão 3.9.2)
-##### Autor: [Nathan](https://github.com/neitaans) e [Vic](https://github.com/vickyad)
+##### Autores: [Nathan](https://github.com/neitaans) e [Vic](https://github.com/vickyad)
 
 
 ## Descrição
@@ -168,8 +168,6 @@ pet.inter.ferias
 ---------------------------------------
 
 ## Melhorias a serem feitas
-- Troca dos documentos `.txt` para `.json`
-- Melhoria do comando de help
 - Melhorar a verificação de datas válidas para retrospectiva e interpet
 - Melhorar os avisos nos canais sobre os eventos
 - Arrumar as datas do interpet
