@@ -5,12 +5,7 @@ import discord
 from decouple import config
 from discord.ext import commands, tasks
 from discord.ext.commands import MissingRequiredArgument, CommandNotFound
-
-def initialize_date(current_day, interval):
-    today = datetime.date.today()
-    while current_day < today:
-        current_day += datetime.timedelta(days=interval)
-    return current_day
+import utils
 
 
 # Constants
@@ -20,20 +15,18 @@ MATHEUS = "<@282646325185609728>"
 RETRO_CHANNEL = 939127640898539520
 BOT_RECOMMENDATIONS_CHANNEL = 939130179698196530
 
-# Setup
+# SETUP
 bot_prefix = commands.Bot("pet.")
 bot_prefix.remove_command("help")
 
-retro_day = initialize_date(datetime.date(2022, 2, 23), 14)
-interpet_day = initialize_date(datetime.date(2022, 2, 19), 30)
+retro_day = utils.initialize_date(datetime.date(2022, 1, 28), 14)
+interpet_day = utils.initialize_date(datetime.date(2022, 2, 19), 30)
 
-
-# Get swearings from file
-with open('data.json', 'r', encoding='utf-8') as json_file:
-    data = json.load(json_file)
-
+# Get swearings and praises from file
+data = utils.read_file('data.json')
 praise_list = data['praises']
 offense_list = data['offenses']
+
 
 # EVENTS
 @bot_prefix.event
@@ -64,11 +57,8 @@ async def offend_matheus(ctx):
 async def add_offense(ctx, *args):
     message = ' '.join(args).lower()
     offense_list.append(message)
-
-    di = {'offenses': offense_list, 'praises': praise_list}
-    with open('data.json', 'w+', encoding='utf-8') as outfile:
-        json.dump(di, outfile)
-        await ctx.send(f'"{message}" foi adicionado à lista!')
+    utils.add_new_item_to_dict(offense_list, praise_list)
+    await ctx.send(f'"{message}" foi adicionado à lista!')
 
 
 # Command: Remover xingamento
@@ -77,11 +67,8 @@ async def remove_offense(ctx, *args):
     swear_to_be_removed = ' '.join(args).lower()
     if swear_to_be_removed in offense_list:
         offense_list.remove(swear_to_be_removed)
-
-        di = {'offenses': offense_list, 'praises': praise_list}
-        with open('data.json', 'w+', encoding='utf-8') as outfile:
-            json.dump(di, outfile)
-            await ctx.send(f'"{swear_to_be_removed}" foi removido da lista!')
+        utils.add_new_item_to_dict(offense_list, praise_list)
+        await ctx.send(f'"{swear_to_be_removed}" foi removido da lista!')
     else:
         await ctx.send(f'esse xingamento não existe')
 
@@ -90,12 +77,12 @@ async def remove_offense(ctx, *args):
 @bot_prefix.command(name="xingamentos", help="lista todas as formas possíveis de ofender o Matheus")
 async def show_offenses(ctx):
     printable_offense_list = ', '.join(offense_list).lower()
-    em = discord.Embed(color=0xFF6347)
-    em.add_field(
+    embed = discord.Embed(color=0xFF6347)
+    embed.add_field(
         name="**Lista de xingamentos:**",
         value=f'{printable_offense_list}'
     )
-    await ctx.send(embed = em)
+    await ctx.send(embed = embed)
 
 
 # Command: Elogiar
@@ -110,11 +97,8 @@ async def praise(ctx, arg):
 async def add_praise(ctx, *args):
     message = ' '.join(args).lower()
     praise_list.append(message)
-
-    di = {'offenses': offense_list, 'praises': praise_list}
-    with open('data.json', 'w+', encoding='utf-8') as outfile:
-        json.dump(di, outfile)
-        await ctx.send(f'"{message}" foi adicionado à lista!')
+    utils.add_new_item_to_dict(offense_list, praise_list)
+    await ctx.send(f'"{message}" foi adicionado à lista!')
 
 
 # Command: Remover elogio
@@ -123,11 +107,8 @@ async def remove_praise(ctx, *args):
     praise_to_be_removed = ' '.join(args).lower()
     if praise_to_be_removed in praise_list:
         praise_list.remove(praise_to_be_removed)
-
-        di = {'offenses': offense_list, 'praises': praise_list}
-        with open('data.json', 'w+', encoding='utf-8') as outfile:
-            json.dump(di, outfile)
-            await ctx.send(f'"{praise_to_be_removed}" foi removido da lista!')
+        utils.add_new_item_to_dict(offense_list, praise_list)
+        await ctx.send(f'"{praise_to_be_removed}" foi removido da lista!')
     else:
         await ctx.send(f'esse elogio não existe')
 
@@ -136,12 +117,12 @@ async def remove_praise(ctx, *args):
 @bot_prefix.command(name="elogios", help="mostra todas as formas de elogiar os outros")
 async def show_praises(ctx):
     printable_praise_list = ', '.join(praise_list).lower()
-    em = discord.Embed(color=0x9370DB)
-    em.add_field(
+    embed = discord.Embed(color=0x9370DB)
+    embed.add_field(
         name="**Lista de elogios:**",
         value=f'{printable_praise_list}'
     )
-    await ctx.send(embed = em) 
+    await ctx.send(embed = embed) 
 
 
 # Command: Hug    
@@ -204,6 +185,14 @@ async def set_interpet_vacation(ctx):
     await ctx.reply("bot entrando de férias do interpet! Sem mais avisos ou afins.")
 
 
+# Command: Lideres do mês
+@bot_prefix.command(name="lideres", help="saiba quem manda esse mês")
+async def month_leadership(ctx):
+    data = utils.read_file("leadership.json")
+    leadership = data[f'{datetime.date.today().month}']
+    await ctx.reply(f'esse mês, o líder é **{leadership[0]}** e o vice é **{leadership[1]}**')
+
+
 # ROTINES
 @tasks.loop(hours=24)
 async def is_retrospective_eve():
@@ -233,6 +222,21 @@ async def remember_interpet():
     interpet_day += datetime.timedelta(month=1)
     channel = bot_prefix.get_channel(RETRO_CHANNEL)
     await channel.send(f'atenção, {PETIANES}!\n lembrando que amanhã é dia de interpet, estejam acordados amanhã de manhã!')
+
+
+@tasks.loop(hours=24)
+async def is_first_day_of_month():
+    if datetime.date.today().day == 1:
+        disclose_leadership.start()
+
+
+@tasks.loop(count=1)
+async def disclose_leadership():
+    channel = bot_prefix.get_channel(RETRO_CHANNEL)
+    data = utils.read_file("leadership.json")
+    leadership = data[f'{datetime.date.today().month}']
+    await channel.send(f'atenção, {PETIANES}! Esse mês nosso ditador e vice ditador são {leadership[0]} e {leadership[1]}')
+
 
 # HELP COMMANDS
 @bot_prefix.group(invoke_without_command=True)
